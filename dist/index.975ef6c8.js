@@ -27248,24 +27248,114 @@ var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _gameGridJs = require("./GameGrid.js");
 var _gameGridJsDefault = parcelHelpers.interopDefault(_gameGridJs);
-// TODO: Import useState() hook
+var _s = $RefreshSig$();
 function Game() {
-    // TODO: Replace variables with state variables
-    const moves = new Array(9).fill("");
-    const turn = "X";
-    function gridClick(whichSquare) {
-        // TODO: Replace with code to set the move and turn
-        alert("Clicked on " + whichSquare);
+    _s();
+    const [moves, setMoves] = (0, _react.useState)(new Array(9).fill(""));
+    const [turn, setTurn] = (0, _react.useState)("X");
+    const [winner, setWinner] = (0, _react.useState)(null); // Track the winner or tie state
+    function checkWinner(moves) {
+        const winPatterns = [
+            [
+                0,
+                1,
+                2
+            ],
+            [
+                3,
+                4,
+                5
+            ],
+            [
+                6,
+                7,
+                8
+            ],
+            [
+                0,
+                3,
+                6
+            ],
+            [
+                1,
+                4,
+                7
+            ],
+            [
+                2,
+                5,
+                8
+            ],
+            [
+                0,
+                4,
+                8
+            ],
+            [
+                2,
+                4,
+                6
+            ] // Diagonals
+        ];
+        for (let pattern of winPatterns){
+            const [a, b, c] = pattern;
+            if (moves[a] && moves[a] === moves[b] && moves[a] === moves[c]) return moves[a]; // Return "X" or "O" as the winner
+        }
+        // Check for a tie
+        if (moves.every((move)=>move !== "")) return "Tie";
+        return null; // No winner or tie yet
     }
-    // TODO: Add newGame() function here
-    // TODO: Make New Game button to call newGame() when clicked
+    function gridClick(whichSquare) {
+        if (winner || moves[whichSquare] !== "" || turn === "O") return; // Ignore clicks if game is over, square is taken, or it's not the player's turn
+        const movesCopy = [
+            ...moves
+        ];
+        movesCopy[whichSquare] = turn;
+        setMoves(movesCopy);
+        const currentWinner = checkWinner(movesCopy);
+        if (currentWinner) setWinner(currentWinner); // Set the winner if found
+        else // Alternate turns
+        setTurn("O");
+    }
+    function newGame() {
+        setMoves(new Array(9).fill(""));
+        setTurn("X");
+        setWinner(null);
+    }
+    // Computer makes a random "O" move
+    function computerMove(moves) {
+        const emptySquares = moves.map((move, index)=>move === "" ? index : null).filter((index)=>index !== null);
+        // Simple AI to pick a random available square
+        if (emptySquares.length > 0) {
+            const randomIndex = Math.floor(Math.random() * emptySquares.length);
+            moves[emptySquares[randomIndex]] = "O";
+        }
+        return moves;
+    }
+    // Handle computer's turn
+    (0, _react.useEffect)(()=>{
+        if (turn === "O" && !winner) setTimeout(()=>{
+            const movesCopy = [
+                ...moves
+            ];
+            const updatedMoves = computerMove(movesCopy);
+            setMoves(updatedMoves);
+            const currentWinner = checkWinner(updatedMoves);
+            if (currentWinner) setWinner(currentWinner); // Set the winner if computer wins
+            else setTurn("X"); // Pass turn back to player
+        }, 500); // Add a slight delay for better UX
+    }, [
+        turn,
+        moves,
+        winner
+    ]);
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _jsxDevRuntime.Fragment), {
         children: [
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
                 children: "Tic-Tac-Toe"
             }, void 0, false, {
                 fileName: "src/Game.js",
-                lineNumber: 22,
+                lineNumber: 88,
                 columnNumber: 10
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _gameGridJsDefault.default), {
@@ -27273,10 +27363,22 @@ function Game() {
                 click: gridClick
             }, void 0, false, {
                 fileName: "src/Game.js",
-                lineNumber: 23,
+                lineNumber: 89,
                 columnNumber: 10
             }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+            winner ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                    children: winner === "Tie" ? "It's a Tie!" : `${winner} Wins!`
+                }, void 0, false, {
+                    fileName: "src/Game.js",
+                    lineNumber: 92,
+                    columnNumber: 16
+                }, this)
+            }, void 0, false, {
+                fileName: "src/Game.js",
+                lineNumber: 91,
+                columnNumber: 13
+            }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                 children: [
                     "Turn: ",
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
@@ -27284,31 +27386,33 @@ function Game() {
                         children: turn
                     }, void 0, false, {
                         fileName: "src/Game.js",
-                        lineNumber: 25,
-                        columnNumber: 19
+                        lineNumber: 96,
+                        columnNumber: 22
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/Game.js",
-                lineNumber: 24,
-                columnNumber: 10
+                lineNumber: 95,
+                columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
+                    onClick: newGame,
                     children: "New Game"
                 }, void 0, false, {
                     fileName: "src/Game.js",
-                    lineNumber: 28,
+                    lineNumber: 100,
                     columnNumber: 13
                 }, this)
             }, void 0, false, {
                 fileName: "src/Game.js",
-                lineNumber: 27,
+                lineNumber: 99,
                 columnNumber: 10
             }, this)
         ]
     }, void 0, true);
 }
+_s(Game, "vQie//W43E4HcchFr6NiISspo/8=");
 _c = Game;
 exports.default = Game;
 var _c;
